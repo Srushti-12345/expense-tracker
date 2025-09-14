@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
 const connectToDB = async () => {
@@ -15,11 +15,13 @@ const ExpenseSchema = new mongoose.Schema({
 
 const Expense = mongoose.models.Expense || mongoose.model('Expense', ExpenseSchema)
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   await connectToDB()
 
+  const { id } = context.params
+
   try {
-    const deleted = await Expense.findByIdAndDelete(params.id)
+    const deleted = await Expense.findByIdAndDelete(id)
     if (!deleted) {
       return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
     }
