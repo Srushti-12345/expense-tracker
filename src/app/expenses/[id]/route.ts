@@ -30,14 +30,14 @@ export async function DELETE(
   }
 
   try {
-    const deletedExpense = await Expense.findByIdAndDelete(id)
+    const deleted = await Expense.findByIdAndDelete(id)
 
-    if (!deletedExpense) {
+    if (!deleted) {
       return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
     }
 
     return NextResponse.json(
-      { message: 'Expense deleted successfully', deletedExpense },
+      { message: 'Expense deleted successfully', deleted },
       { status: 200 }
     )
   } catch (error: any) {
