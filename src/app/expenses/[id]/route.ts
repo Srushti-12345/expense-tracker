@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
-// 🔗 Connect to MongoDB
+// Connect to MongoDB
 const connectToDB = async () => {
   if (mongoose.connection.readyState >= 1) return
   await mongoose.connect(process.env.MONGODB_URI!)
 }
 
-// 📦 Expense Schema and Model
+// Expense Schema and Model
 const ExpenseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -17,12 +17,13 @@ const ExpenseSchema = new mongoose.Schema({
 
 const Expense = mongoose.models.Expense || mongoose.model('Expense', ExpenseSchema)
 
-// 🗑️ DELETE Handler
+// DELETE Handler
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params
+  const { id } = await context.params // ✅ Await the params
+
   await connectToDB()
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -30,14 +31,14 @@ export async function DELETE(
   }
 
   try {
-    const deleted = await Expense.findByIdAndDelete(id)
+    const deletedExpense = await Expense.findByIdAndDelete(id)
 
-    if (!deleted) {
+    if (!deletedExpense) {
       return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
     }
 
     return NextResponse.json(
-      { message: 'Expense deleted successfully', deleted },
+      { message: 'Expense deleted successfully', deletedExpense },
       { status: 200 }
     )
   } catch (error: any) {
