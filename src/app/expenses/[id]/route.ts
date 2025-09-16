@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
-// Connect to MongoDB
+// 🔗 Connect to MongoDB
 const connectToDB = async () => {
   if (mongoose.connection.readyState >= 1) return
   await mongoose.connect(process.env.MONGODB_URI!)
 }
 
-// Expense Schema and Model
+// 📦 Expense Schema and Model
 const ExpenseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -17,12 +17,12 @@ const ExpenseSchema = new mongoose.Schema({
 
 const Expense = mongoose.models.Expense || mongoose.model('Expense', ExpenseSchema)
 
-// DELETE Handler
+// 🗑️ DELETE Handler
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params // ✅ Await the params
+  const { id } = await context.params // ✅ Await the dynamic params
 
   await connectToDB()
 
