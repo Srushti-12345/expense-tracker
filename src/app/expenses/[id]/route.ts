@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 
-// 🔗 Connect to MongoDB only if not already connected
+// 🔗 Connect to MongoDB
 const connectToDB = async () => {
   if (mongoose.connection.readyState >= 1) return
-  try {
-    await mongoose.connect(process.env.MONGODB_URI!)
-  } catch (err) {
-    console.error('MongoDB connection error:', err)
-    throw new Error('Database connection failed')
-  }
+  await mongoose.connect(process.env.MONGODB_URI!)
 }
 
-// 📦 Define Expense schema and model
+// 📦 Expense Schema and Model
 const ExpenseSchema = new mongoose.Schema({
   title: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -22,19 +17,19 @@ const ExpenseSchema = new mongoose.Schema({
 
 const Expense = mongoose.models.Expense || mongoose.model('Expense', ExpenseSchema)
 
-// 🗑️ DELETE handler with awaited params and robust error handling
+// 🗑️ DELETE Handler
 export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params
+  await connectToDB()
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 })
+  }
+
   try {
-    const { id } = await context.params
-    await connectToDB()
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 })
-    }
-
     const deletedExpense = await Expense.findByIdAndDelete(id)
 
     if (!deletedExpense) {
